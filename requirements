@@ -1,0 +1,6 @@
+tmap
+networkx --force-reinstall --no-deps --upgrade --user
+torch
+torch_geometric
+opencv-python
+tensorflow

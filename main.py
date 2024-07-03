@@ -6,15 +6,21 @@ from sklearn.neighbors import kneighbors_graph
 import utils
 import numpy as np
 import pandas as pd
+from scipy import sparse
+
 from data_loader import DataLoader, Dataset
-from methods.SCGC import scgc
+
 from model import Model
-from methods.ARGA import arga
-from methods.DFCN import dfcn_run
-from methods.DAEGC import daegc
-from methods.dmon import train
-from methods.CCGC import ccgc
-from methods.AGE import age
+from graph_data import TopologicalGraph
+
+## SOTA Methods
+# from methods.SCGC import scgc
+# from methods.ARGA import arga
+# from methods.DFCN import dfcn_run
+# from methods.DAEGC import daegc
+from methods.dmon import train as dmon
+# from methods.CCGC import ccgc
+# from methods.AGE import age
 
 
 def get_row_df(method, name, sil, ch, db, acc, nmi, ari):
@@ -46,8 +52,17 @@ datasets = [
 for dataset in datasets:
     print(f'------------------- data: {dataset.name}')
 
-    data, A, y_louvain, y_true, _ = DataLoader(dataset).load()
-    n_clusters = len(np.unique(y_true))
+    data = DataLoader(dataset).load()
+    
+    num_nodes = data.x.shape[0]
+    edge_index = data.edge_index
+    n_clusters = data.num_classes
+    y_true = data.y
+    y_true_sorted = y_true[np.argsort(y_true)]
+
+    A = torch.zeros((num_nodes, num_nodes), dtype=torch.float)
+    A[edge_index[0], edge_index[1]] = 1.0
+    A = sparse.csc_matrix(A.numpy())
 
     for it in range(1):
 
@@ -63,9 +78,7 @@ for dataset in datasets:
         # sil, ch, db, acc, nmi, ari = utils.evaluate(data.x, y_true, y_louvain)
         # row = get_row_df('baseline_louvain', dataset.name, sil, ch, db, acc, nmi, ari)
         # results = pd.concat([results, pd.DataFrame(row)], axis=0)
-        # print('---------------------------------')
-
-        A_arr = A.toarray()
+        # print('---------------------------------')        
 
         # OURS
         # print('----------------------- OURS (KMeans)')
@@ -75,22 +88,24 @@ for dataset in datasets:
         # row = get_row_df('GCN_KMeans', dataset.name, sil, ch, db, acc, nmi, ari)
         # results = pd.concat([results, pd.DataFrame(row)], axis=0)
 
-        print('----------------------- OURS (Louvain)')
-        embedding, y_pred = Model(data, y_louvain, y_true, n_clusters).train()
+        print('----------------------- OURS (TDGC)')
+        data_pos, data_neg = TopologicalGraph(data.x, n_clusters).get_contrastive_data_graph()
+        embedding, y_pred = Model(data_pos, data_neg, n_clusters).train()
         # results
-        sil, ch, db, acc, nmi, ari = utils.evaluate(embedding, y_true, y_pred)
-        row = get_row_df('GCN_Louvain', dataset.name, sil, ch, db, acc, nmi, ari)
-        results = pd.concat([results, pd.DataFrame(row)], axis=0)
+        sil, ch, db, acc, nmi, ari = utils.evaluate(embedding, y_true_sorted, y_pred)
+        # row = get_row_df('GCN_Louvain', dataset.name, sil, ch, db, acc, nmi, ari)
+        # results = pd.concat([results, pd.DataFrame(row)], axis=0)
         print('---------------------------------')
 
 
-        # # DMoN
+        # DMoN
         # print('----------------------- DMoN')
-        # embedding, y_pred = train.main(data.x, A, n_clusters)
-        # # results
+        # embedding, y_pred = dmon.main(data.x, A, n_clusters)
+        # results
         # sil, ch, db, acc, nmi, ari = utils.evaluate(embedding, y_true, y_pred)
         # row = get_row_df('DMoN', dataset.name, sil, ch, db, acc, nmi, ari)
         # results = pd.concat([results, pd.DataFrame(row)], axis=0)
+        # print('---------------------------------')
         #
         # # SCGC
         # print('----------------------- SCGC')

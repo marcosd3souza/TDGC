@@ -19,12 +19,12 @@ from torch_geometric.data import Data
 from torch_geometric.transforms import NormalizeFeatures
 from enum import Enum
 
-from gtda.homology import VietorisRipsPersistence
+# from gtda.homology import VietorisRipsPersistence
 from tmap.tda import mapper, Filter
 from tmap.tda.cover import Cover
 from sklearn.cluster import DBSCAN
 
-from graph import DataGraph, convert_to_graph
+# from graph import DataGraph, convert_to_graph
 
 
 class NonGraphData:
@@ -76,74 +76,37 @@ class NonGraphData:
 
 class Dataset(Enum):
     # Homogeneous Datasets
-    CORA = Planetoid(root='data/Planetoid', name='Cora')
-    CITESEER = Planetoid(root='data/Planetoid', name='CiteSeer')
-    PUBMED = Planetoid(root='data/Planetoid', name='PubMed')
+    CORA = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures())
+    CITESEER = Planetoid(root='data/Planetoid', name='CiteSeer', transform=NormalizeFeatures())
+    PUBMED = Planetoid(root='data/Planetoid', name='PubMed', transform=NormalizeFeatures())
 
     # Heterogeneous Dataset
     DBLP = DBLP(root='data/DBLP')
 
     # non-graph data
-    CIFAR10 = NonGraphData().load_cifar10()
-    USPS = NonGraphData(path='./data/USPS.mat').load_usps()
-    MNIST = NonGraphData(path='./data/MNIST_2k2k.mat').load_mnist()
+    # CIFAR10 = NonGraphData().load_cifar10()
+    # USPS = NonGraphData(path='./data/USPS.mat').load_usps()
+    # MNIST = NonGraphData(path='./data/MNIST_2k2k.mat').load_mnist()
 
 
 class DataLoader:
     def __init__(self, dataset: Dataset):
-        self.dataset = dataset
-
-    def construct_W(self, y):
-        label = np.unique(y)
-        n_samples = len(y)
-        n_classes = np.unique(y).size
-        # construct the weight matrix W in a fisherScore way, W_ij = 1/n_l if yi = yj = l, otherwise W_ij = 0
-        W = lil_matrix((n_samples, n_samples))
-        for i in range(n_classes):
-            class_idx = (y == label[i])
-            class_idx_all = (class_idx[:, np.newaxis] & class_idx[np.newaxis, :])
-            W[class_idx_all] = 1.0 # / np.sum(np.sum(class_idx))
-        return W
+        self.data = dataset.value
+        self.n_clusters = dataset.value.num_classes
 
     def load(self):
-        self.X = self.dataset.value.x
-        y_true = self.dataset.value.y.numpy()
+        self.X = self.data.x.numpy()
+        self.y = self.data.y.numpy()
+        self.edge_index = self.data.edge_index
 
-        D = squareform(pdist(self.X.numpy(), metric="cosine"))
+        return self.construct_data()
 
-        ### TDA
-        # Step1. initiate a Mapper
-        tm = mapper.Mapper(verbose=1)
-        # Step2. Projection
-        lens = [Filter.UMAP(metric=Metric(metric="precomputed"))]
-        self.projected_X = tm.filter(D, lens=lens)
-        # Step3. Create Cover
-        cover = Cover(projected_data=self.projected_X, resolution=20, overlap=0.75)
-        # Step4. Create Graph
-        G_tda = tm.map(data=self.projected_X, cover=cover)
-        G_tda = convert_to_graph(G_tda)
-
-        graph = DataGraph(self.projected_X, len(np.unique(y_true)))
-
-        G, A = graph.get_knn_graph()
-        y, n_clusters = graph.get_graph_communities(G_tda, res=1.0)
-        # center_means = [np.log(np.mean(projected_X[y == i])) for i in range(n_clusters)]
-        # target_distribution = self.get_target_distribution(center_means)
-        # W = self.construct_W(y).toarray()
-        # G = nx.from_numpy_array(W)
-        edge_index = from_networkx(G).edge_index # self.dataset.value.edge_index
-
-        data = self.construct_data(y, n_clusters, edge_index)
-
-        return data, A, y, y_true, n_clusters
-
-    def construct_data(self, y, n_clusters, edge_index):
+    def construct_data(self):
         data = Data(
-            x=torch.tensor(self.projected_X, dtype=torch.float),
-            y=y,
-            edge_index=edge_index,
-            num_classes=n_clusters,
-            transform=NormalizeFeatures()
+            x=torch.tensor(self.X, dtype=torch.float),
+            y=torch.tensor(self.y, dtype=torch.long),
+            edge_index=self.edge_index,
+            num_classes=self.n_clusters
         )
 
         print(f'Dataset: {data}:')
