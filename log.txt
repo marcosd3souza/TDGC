@@ -1,0 +1,82 @@
+2024-02-04 10:59:43.197273: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:From /home/marcos/miniconda3/envs/deep_graph_clustering/lib/python3.10/site-packages/tensorflow/python/compat/v2_compat.py:107: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+Instructions for updating:
+non-resource variables are not supported in the long term
+------------------- data: CITESEER
+resolution:  0.1
+best modularity: 0.5376020790449885
+best K: 195
+resolution:  0.25263157894736843
+best modularity: 0.570363525122214
+best K: 96
+resolution:  0.4052631578947369
+best modularity: 0.5829379927569358
+best K: 65
+resolution:  0.5578947368421052
+best modularity: 0.59303614691397
+best K: 46
+resolution:  0.7105263157894737
+best modularity: 0.600195387975177
+best K: 37
+resolution:  0.8631578947368421
+best modularity: 0.6033587971085415
+best K: 28
+resolution:  1.0157894736842106
+best modularity: 0.6075929209198024
+best K: 24
+resolution:  1.168421052631579
+best modularity: 0.6067844871934154
+best K: 19
+resolution:  1.3210526315789475
+best modularity: 0.6047004617732173
+best K: 17
+resolution:  1.473684210526316
+best modularity: 0.6020668301755674
+best K: 15
+resolution:  1.6263157894736844
+best modularity: 0.5922834792439741
+best K: 12
+resolution:  1.7789473684210528
+best modularity: 0.5927841515596353
+best K: 10
+resolution:  1.931578947368421
+resolution:  2.0842105263157893
+best modularity: 0.5694919566594567
+best K: 9
+resolution:  2.236842105263158
+best modularity: 0.563908476191159
+best K: 8
+resolution:  2.3894736842105266
+best modularity: 0.5316883900492294
+best K: 7
+resolution:  2.542105263157895
+best modularity: 0.5276222181376696
+best K: 6
+Dataset: Data(x=[3327, 3703], edge_index=[2, 2885377], y=[3327], num_classes=6, transform=NormalizeFeatures()):
+======================
+Number of graphs: 5
+Number of features: 3703
+Number of classes: 6
+----------------------- Baseline Kmeans
+---------------------- clustering performance ------------------------
+----------------- unsupervised
+sil: 0.008540384471416473
+----------------- supervised
+acc: 0.42019837691614065
+nmi: 0.20001916343269796
+ari: 0.15824792996685058
+----------------------------------------------------------------------
+---------------------------------
+----------------------- Baseline Louvain
+---------------------- clustering performance ------------------------
+----------------- unsupervised
+sil: -0.061082623898983
+----------------- supervised
+acc: 0.5148782687105501
+nmi: 0.2429375885159677
+ari: 0.22389351616065842
+----------------------------------------------------------------------
+---------------------------------
+----------------------- OURS (Louvain)
+  0%|          | 0/100 [00:00<?, ?it/s]

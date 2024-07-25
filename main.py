@@ -42,8 +42,10 @@ def get_row_df(method, name, sil, ch, db, acc, nmi, ari):
 results = pd.DataFrame()
 datasets = [
     Dataset.CORA,
-    # Dataset.CITESEER,
-    # Dataset.PUBMED,
+    Dataset.CORAFULL,
+    Dataset.CITESEER,
+    # Dataset.PUBMED, # Very large graph
+    # Dataset.DBLP # heterogeneous data
     # Dataset.CIFAR10, # muito difícil (DMoN não converge)
     # Dataset.MNIST,
     # Dataset.USPS
@@ -64,7 +66,7 @@ for dataset in datasets:
     A[edge_index[0], edge_index[1]] = 1.0
     A = sparse.csc_matrix(A.numpy())
 
-    for it in range(1):
+    for it in range(10):
 
         # print('----------------------- Baseline Kmeans')
         # y_kmeans = KMeans(n_clusters).fit_predict(data.x.numpy())
@@ -93,8 +95,8 @@ for dataset in datasets:
         embedding, y_pred = Model(data_pos, data_neg, n_clusters).train()
         # results
         sil, ch, db, acc, nmi, ari = utils.evaluate(embedding, y_true_sorted, y_pred)
-        # row = get_row_df('GCN_Louvain', dataset.name, sil, ch, db, acc, nmi, ari)
-        # results = pd.concat([results, pd.DataFrame(row)], axis=0)
+        row = get_row_df('TDGC', dataset.name, sil, ch, db, acc, nmi, ari)
+        results = pd.concat([results, pd.DataFrame(row)], axis=0)
         print('---------------------------------')
 
 
@@ -154,7 +156,7 @@ for dataset in datasets:
         # row = get_row_df('AGE', dataset.name, sil, ch, db, acc, nmi, ari)
         # results = pd.concat([results, pd.DataFrame(row)], axis=0)
 
-# results.to_csv('benchmark.csv', sep=';', index=False)
+results.to_csv('benchmark_07_2024.csv', sep=';', index=False)
 # print('------------------------------------------ RESULTS -------------------------------------------')
 # methods = [
 #     'baseline_kmeans',
