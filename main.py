@@ -41,10 +41,11 @@ def get_row_df(method, name, sil, ch, db, acc, nmi, ari):
 
 results = pd.DataFrame()
 datasets = [
-    Dataset.CORA,
-    Dataset.CORAFULL,
-    Dataset.CITESEER,
+    # Dataset.CORA,
+    # Dataset.CORAFULL,
+    # Dataset.CITESEER,
     # Dataset.PUBMED, # Very large graph
+    Dataset.AMAP, # Very large graph
     # Dataset.DBLP # heterogeneous data
     # Dataset.CIFAR10, # muito difícil (DMoN não converge)
     # Dataset.MNIST,
@@ -156,7 +157,7 @@ for dataset in datasets:
         # row = get_row_df('AGE', dataset.name, sil, ch, db, acc, nmi, ari)
         # results = pd.concat([results, pd.DataFrame(row)], axis=0)
 
-results.to_csv('benchmark_07_2024.csv', sep=';', index=False)
+results.to_csv('benchmark_07_2024_amap.csv', sep=';', index=False)
 # print('------------------------------------------ RESULTS -------------------------------------------')
 # methods = [
 #     'baseline_kmeans',

@@ -13,7 +13,7 @@ from sklearn.metrics import pairwise_distances
 from sklearn.neighbors import kneighbors_graph
 from tmap.tda.metric import Metric
 from torch_geometric.data import InMemoryDataset
-from torch_geometric.datasets import Planetoid, DBLP, CoraFull
+from torch_geometric.datasets import Planetoid, DBLP, CoraFull, Amazon
 from torch_geometric.utils import from_networkx
 from torch_geometric.data import Data
 from torch_geometric.transforms import NormalizeFeatures
@@ -80,6 +80,8 @@ class Dataset(Enum):
     CORAFULL = Planetoid(root='data/CitationFull', name='Cora', transform=NormalizeFeatures())
     CITESEER = Planetoid(root='data/Planetoid', name='CiteSeer', transform=NormalizeFeatures())
     PUBMED = Planetoid(root='data/Planetoid', name='PubMed', transform=NormalizeFeatures())
+    AMAP = Amazon(root='data/AMAP', name='Photo', transform=NormalizeFeatures())
+    AMAC = Amazon(root='data/AMAC', name='Computers', transform=NormalizeFeatures())
 
     # Heterogeneous Dataset
     DBLP = DBLP(root='data/DBLP')
